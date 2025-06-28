@@ -1,0 +1,38 @@
+{
+  "name": "bff-example",
+  "version": "1.0.0",
+  "description": "Using Backend For Frontend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "path": "^0.12.7",
+    "url": "^0.11.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lksalmpdr/bff-example.git"
+  },
+  "type": "module",
+  "keywords": [
+    "node",
+    "javascript",
+    "backend",
+    "frontend"
+  ],
+  "author": "Pedro Lucas de Almeida",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lksalmpdr/bff-example/issues"
+  },
+  "homepage": "https://github.com/lksalmpdr/bff-example#readme"
+}
