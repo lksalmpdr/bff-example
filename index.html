@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BFF Example</title>
+</head>
+<body>
+  <h1>Informações do Usuário</h1>
+  <div id="user-info">Carregando...</div>
+
+  <script>
+    fetch('http://localhost:3000/api/user')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('user-info').innerHTML = `
+          <p><strong>Nome:</strong> ${data.name}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Empresa:</strong> ${data.company}</p>
+        `;
+        console.log(data);
+      })
+      .catch(err => {
+        document.getElementById('user-info').textContent = 'Erro ao carregar dados.';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
