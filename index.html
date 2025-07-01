@@ -8,6 +8,7 @@
     .card { background: #f1f1f1; padding: 15px; margin-top: 15px; border-radius: 8px; }
     .hidden { display: none; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js" defer></script>
 </head>
 <body>
 
@@ -16,6 +17,9 @@
   <div id="login-form">
     <label for="username">Usuário:</label>
     <input type="text" id="username" />
+
+    <label for="password">Senha:</label>
+    <input type="password" id="password" />
     <button onclick="login()">Login</button>
   </div>
 
@@ -26,7 +30,7 @@
 
     <h2>Pedidos</h2>
     <div id="orders-list"></div>
-
+    <br>
     <button onclick="logout()">Sair</button>
   </div>
 
@@ -38,11 +42,12 @@
 
     async function login() {
       const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
       const res = await fetch(`${BFF_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({ username, password })
       });
 
       const data = await res.json();
@@ -61,7 +66,7 @@
     }
 
     function isTokenExpired(token) {
-      const decoded = jwtDecode(token);
+      const decoded = jwt_decode(token);
       return decoded.exp * 1000 < Date.now();
     }
 
@@ -76,6 +81,7 @@
       if (!token) return;
 
       const cached = localStorage.getItem(CACHE_KEY);
+
       if (cached) {
         displayProfile(JSON.parse(cached));
         return;
@@ -105,19 +111,22 @@
       document.getElementById('profile').classList.remove('hidden');
 
       document.getElementById('user-data').innerHTML = `
-        <p><strong>Nome:</strong> ${data.user.name}</p>
-        <p><strong>Email:</strong> ${data.user.email}</p>
+        <p><strong>Nome:</strong> ${data.user.name || 'Não encontrado'}</p>
+        <p><strong>Email:</strong> ${data.user.email || 'Não encontrado'}</p>
       `;
 
-      const orders = data.orders.map(order => `
-        <div class="card">
-          <p><strong>Pedido #${order.id}</strong></p>
-          <p>Item: ${order.item}</p>
-          <p>Total: R$ ${order.total}</p>
-        </div>
-      `).join('');
-
-      document.getElementById('orders-list').innerHTML = orders;
+      if(data.orders && data.orders.length > 0){
+        const orders = data.orders.map(order => `
+          <div class="card">
+            <p><strong>Pedido #${order.id}</strong></p>
+            <p>Item: ${order.item}</p>
+            <p>Total: R$ ${order.total}</p>
+          </div><br>
+        `).join('');
+        document.getElementById('orders-list').innerHTML = orders;
+      }else{
+        document.getElementById('orders-list').innerHTML = 'Não há pedidos<br>';
+      } 
     }
 
     // Carrega automaticamente se já estiver logado

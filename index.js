@@ -48,7 +48,7 @@ app.get("/api/protected", verifyToken, (req, res) => {
 });
 
 //Endpoint de login
-app.post("/api/login", (req, res) => {
+app.post("/auth/login", (req, res) => {
     const { username, password } = req.body;
     if (username === "admin" && password === "123456") {
         const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
@@ -60,7 +60,9 @@ app.post("/api/login", (req, res) => {
 
 //Endpoint que agrega dados do perfil do usuário
 app.get("/api/profile", verifyToken, async(req, res) => {
-    const user = req.user.id;
+    const reqUser = req.user;
+    const user = 'admin' == reqUser.username ? Math.floor(Math.random() * 10) : '';
+
     try {
         const [userData, ordersData] = await Promise.all([
             fetch(`https://jsonplaceholder.typicode.com/users/${user}`).then(res => res.json()),
