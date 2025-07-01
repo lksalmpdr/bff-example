@@ -1,8 +1,8 @@
 import cors from "cors";
 import express from "express";
+import jwt from "jsonwebtoken";
 import fetch from "node-fetch";
 import path from "path";
-import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -98,5 +98,5 @@ app.get("/api/user", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`BFF rodando em  http://localhost:${PORT}`);
+    console.log(`BFF rodando em backend em http://localhost:${PORT}`);
 });
