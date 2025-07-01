@@ -85,18 +85,18 @@ app.get("/api/user", async (req, res) => {
         const userData = await response.json();
 
         //adaptar para o formato esperado pelo frontend
-        const adaptedData = {
+        const resData = {
             name: userData.name,
             email: userData.email,
             company: userData.company.name,
         };
 
-        res.json(adaptedData);
+        res.json(resData);
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar dados do usuário" });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`BFF rodando em backend em http://localhost:${PORT}`);
+    console.log(`BFF rodando em  http://localhost:${PORT}`);
 });
