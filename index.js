@@ -1,8 +1,8 @@
 import cors from "cors";
 import express from "express";
+import jwt from "jsonwebtoken";
 import fetch from "node-fetch";
 import path from "path";
-import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -85,13 +85,13 @@ app.get("/api/user", async (req, res) => {
         const userData = await response.json();
 
         //adaptar para o formato esperado pelo frontend
-        const adaptedData = {
+        const resData = {
             name: userData.name,
             email: userData.email,
             company: userData.company.name,
         };
 
-        res.json(adaptedData);
+        res.json(resData);
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar dados do usuário" });
     }
