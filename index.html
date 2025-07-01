@@ -1,28 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>BFF Example</title>
+  <meta charset="UTF-8" />
+  <title>Perfil do Usuário - BFF</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .card { background: #f1f1f1; padding: 15px; margin-top: 15px; border-radius: 8px; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
-  <h1>Informações do Usuário</h1>
-  <div id="user-info">Carregando...</div>
+
+  <h1>Perfil do Usuário</h1>
+
+  <div id="login-form">
+    <label for="username">Usuário:</label>
+    <input type="text" id="username" />
+    <button onclick="login()">Entrar</button>
+  </div>
+
+  <div id="profile" class="hidden">
+    <button onclick="loadProfile(true)">Atualizar Dados</button>
+    <h2>Dados do Usuário</h2>
+    <div class="card" id="user-data"></div>
+
+    <h2>Pedidos</h2>
+    <div id="orders-list"></div>
+
+    <button onclick="logout()">Sair</button>
+  </div>
 
   <script>
-    fetch('http://localhost:3000/api/user')
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('user-info').innerHTML = `
-          <p><strong>Nome:</strong> ${data.name}</p>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>Empresa:</strong> ${data.company}</p>
-        `;
-        console.log(data);
-      })
-      .catch(err => {
-        document.getElementById('user-info').textContent = 'Erro ao carregar dados.';
-        console.error(err);
+    const BFF_URL = 'http://localhost:3000';
+    const TOKEN_KEY = 'auth_token';
+    const CACHE_KEY = 'cached_profile';
+    const CACHE_TTL = 60 * 1000;
+
+    async function login() {
+      const username = document.getElementById('username').value;
+
+      const res = await fetch(`${BFF_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
       });
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem(TOKEN_KEY, data.token);
+        loadProfile();
+      } else {
+        alert('Falha no login');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(CACHE_KEY);
+      location.reload();
+    }
+
+    function isTokenExpired(token) {
+      const decoded = jwtDecode(token);
+      return decoded.exp * 1000 < Date.now();
+    }
+
+    function isCacheValid(cache) {
+      if(!cache || !cache.timestamp) return false;
+      const age = Date.now() - cache.timestamp;
+      return age < CACHE_TTL;
+    }
+
+    async function loadProfile(forceRefresh = false) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        displayProfile(JSON.parse(cached));
+        return;
+      }
+
+      if (!forceRefresh && isTokenExpired(token) && isCacheValid(cached)) {
+        displayProfile(JSON.parse(cached));
+        return;
+      }
+
+      const res = await fetch(`${BFF_URL}/api/profile`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (!res.ok) {
+        alert('Erro ao buscar perfil');
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      displayProfile(data);
+    }
+
+    function displayProfile(data) {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('profile').classList.remove('hidden');
+
+      document.getElementById('user-data').innerHTML = `
+        <p><strong>Nome:</strong> ${data.user.name}</p>
+        <p><strong>Email:</strong> ${data.user.email}</p>
+      `;
+
+      const orders = data.orders.map(order => `
+        <div class="card">
+          <p><strong>Pedido #${order.id}</strong></p>
+          <p>Item: ${order.item}</p>
+          <p>Total: R$ ${order.total}</p>
+        </div>
+      `).join('');
+
+      document.getElementById('orders-list').innerHTML = orders;
+    }
+
+    // Carrega automaticamente se já estiver logado
+    window.onload = loadProfile;
   </script>
+
 </body>
 </html>
